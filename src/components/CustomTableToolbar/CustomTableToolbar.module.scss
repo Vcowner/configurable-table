@@ -1,0 +1,152 @@
+/**
+ * CustomTableToolbar 组件模块化样式
+ * 使用 SASS 语法
+ */
+
+// ==================== SASS 变量 ====================
+$toolbar-bg-color: #fafafa;
+$toolbar-border-radius: 8px;
+$toolbar-padding: 16px;
+$toolbar-gap: 12px;
+$toolbar-margin: 12px;
+
+$advanced-bg-color: #f9f9f9;
+$advanced-border-radius: 6px;
+$advanced-padding: 12px;
+$advanced-gap: 30px;
+
+$button-gap: 12px;
+$button-border-radius: 6px;
+
+$form-item-margin: 16px;
+$form-label-color: #666;
+$form-label-size: 14px;
+
+// ==================== SASS 混入 ====================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+@mixin flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+@mixin button-style {
+  border-radius: $button-border-radius;
+  font-weight: 500;
+}
+
+// ==================== 组件样式 ====================
+
+.table-toolbar {
+  width: 100%;
+  border-radius: $toolbar-border-radius;
+}
+
+// 基础搜索行样式
+.toolbar-search-row {
+  @include flex-wrap;
+  @include flex-center;
+  gap: $toolbar-gap;
+  margin-bottom: $toolbar-margin;
+}
+
+// 高级搜索区域样式
+.toolbar-advanced-row {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  background-color: $advanced-bg-color;
+  padding: $advanced-padding;
+  border-radius: $advanced-border-radius;
+}
+
+// 高级搜索表单样式
+.advanced-form {
+  margin: 0;
+  @include flex-center;
+  justify-content: center;
+  gap: $advanced-gap;
+}
+
+// 高级搜索表单项样式
+.advanced-form-item {
+  margin-bottom: 20px;
+  margin-top: 8px;
+
+  // 深度选择器样式
+  :deep(.ant-form-item-label) {
+    padding-bottom: 4px;
+  }
+
+  :deep(.ant-form-item-label > label) {
+    font-size: $form-label-size;
+    color: $form-label-color;
+    height: auto;
+  }
+}
+
+// 操作按钮行样式
+.toolbar-action-row {
+  @include flex-wrap;
+  @include flex-center;
+  @include flex-between;
+  gap: $button-gap;
+  margin-bottom: 12px;
+  margin-top: 8px;
+
+  // 按钮组内部间隔
+  > div {
+    @include flex-center;
+    gap: $button-gap;
+  }
+}
+
+// 按钮样式增强
+.toolbar-action-row {
+  :deep(.ant-btn) {
+    @include button-style;
+  }
+}
+
+// ==================== 响应式样式 ====================
+@media (max-width: 768px) {
+  .toolbar-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-action-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    > div {
+      justify-content: center;
+    }
+  }
+
+  .advanced-form {
+    flex-direction: column;
+    gap: $toolbar-gap;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-toolbar {
+    padding: $toolbar-gap;
+  }
+
+  .toolbar-search-row {
+    gap: 8px;
+  }
+
+  .toolbar-action-row {
+    gap: 8px;
+  }
+}

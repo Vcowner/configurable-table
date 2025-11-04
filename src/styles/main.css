@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+
+/* 修复 Tailwind CSS 与 Ant Design Vue 的样式冲突 */
+@layer base {
+  /* 重置可能影响 Ant Design 的 Tailwind 样式 */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* 确保 Ant Design 组件不受 Tailwind 重置影响 */
+  .ant-btn,
+  .ant-btn *,
+  .anticon,
+  .anticon * {
+    box-sizing: content-box;
+  }
+}
+
+/* 自定义样式 */
+@layer base {
+  html {
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+  }
+
+  body {
+    color: #111827;
+    background-color: #f9fafb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      color: #f3f4f6;
+      background-color: #111827;
+    }
+  }
+}
+
+@layer components {
+  /* 修复 Ant Design Vue 与 Tailwind CSS 的样式冲突 */
+  
+  /* 修复按钮图标对齐问题 */
+  .ant-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .ant-btn .anticon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+  }
+  
+  /* 修复图标基线对齐 */
+  .anticon {
+    vertical-align: middle !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  
+  /* 修复表格图标对齐 */
+  .ant-table .anticon {
+    vertical-align: middle !important;
+  }
+  
+  /* 修复菜单图标对齐 */
+  .ant-menu .anticon {
+    vertical-align: middle !important;
+  }
+  
+  /* 修复面包屑图标对齐 */
+  .ant-breadcrumb .anticon {
+    vertical-align: middle !important;
+  }
+  
+  /* 自定义组件样式 */
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #3b82f6;
+  }
+
+  .card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .card {
+      background-color: #1f2937;
+      border-color: #374151;
+    }
+  }
+}
