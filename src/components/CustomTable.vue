@@ -1,5 +1,5 @@
 <template>
-  <div class="configurable-table">
+  <div ref="tableContainerRef" class="configurable-table">
     <!-- 搜索和操作工具栏 -->
     <CustomTableToolbar
       v-if="searchList?.length"
@@ -19,7 +19,7 @@
       :bordered="bordered"
       :size="size || 'middle'"
       :row-selection="selectionConfig"
-      :scroll="scroll"
+      :scroll="mergedScroll"
       v-bind="$attrs"
       @change="handleTableChange"
     />
@@ -33,6 +33,7 @@ import { formatDate, formatTime } from '@/utils/time'
 import { getStatusConfigByValue } from '@/enums/status'
 import CustomTableToolbar from '@/components/CustomTableToolbar/CustomTableToolbar.vue'
 import { Badge, Tag, Tooltip } from 'ant-design-vue'
+import { useSize } from '@/hooks'
 
 interface Props extends TableConfig {}
 
@@ -51,6 +52,50 @@ const {
   operateList,
   scroll,
 } = toRefs(props)
+
+// 表格容器引用
+const tableContainerRef = ref<HTMLElement | null>(null)
+
+// 监听容器尺寸变化
+const containerSize = useSize(
+  computed(() => tableContainerRef.value),
+  {
+    immediate: true,
+    listenWindowResize: false,
+  }
+)
+
+// 计算表格滚动高度（容器高度 - 工具栏高度 - 分页高度 - 缓冲）
+const calculatedScrollHeight = computed(() => {
+  const baseHeight = containerSize.value.height
+  if (baseHeight === 0) return undefined // 如果容器高度为0，不设置滚动高度
+
+  const toolbarHeight = searchList.value?.length ? 80 : 0 // 工具栏高度
+  const paginationHeight = pagination.value ? 60 : 0 // 分页高度
+  const buffer = 80 // 缓冲空间
+
+  const calculatedHeight =
+    baseHeight - toolbarHeight - paginationHeight - buffer
+  return Math.max(calculatedHeight, 300) // 最小高度 300px
+})
+
+// 合并滚动配置：如果外部传入了 scroll，则合并；否则使用计算的高度
+const mergedScroll = computed(() => {
+  if (scroll.value) {
+    // 如果外部传入了 scroll，合并 y 轴高度（优先使用计算的高度）
+    return {
+      ...scroll.value,
+      y: calculatedScrollHeight.value || scroll.value.y,
+    }
+  }
+  // 如果没有传入 scroll，使用计算的高度
+  if (calculatedScrollHeight.value) {
+    return {
+      y: calculatedScrollHeight.value,
+    }
+  }
+  return undefined
+})
 
 // 获取选择配置
 const selection = computed(() => props.rowSelection)

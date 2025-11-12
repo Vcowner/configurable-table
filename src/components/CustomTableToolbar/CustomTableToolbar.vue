@@ -16,7 +16,7 @@
  */
 
 import { computed, h, reactive, ref, watch } from 'vue'
-import { DownOutlined, FileOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, UpOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import type { PropType } from 'vue'
 import type { OperateButtonConfig, SearchConfigItem } from './type'
 import styles from './CustomTableToolbar.module.scss'
@@ -84,6 +84,7 @@ const rightOperateList = computed(() =>
  * @returns 过滤后的按钮属性
  */
 const getButtonProps = (action: OperateButtonConfig) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { icon, label, ...buttonProps } = action
   return buttonProps
 }
@@ -129,7 +130,7 @@ function handleSearch() {
   const values = formRef.value?.getFieldsValue() || {}
   // 过滤掉空值属性
   const filteredValues = Object.fromEntries(
-    Object.entries(values).filter(([key, value]) => {
+    Object.entries(values).filter(([, value]) => {
       return value !== undefined && value !== null && value !== ''
     })
   )
@@ -160,11 +161,11 @@ function renderFormItem(item: SearchConfigItem) {
     case 'input':
       return (
         <a-input
-          v-model:value={searchValues[item.key]}
+          v-model={[searchValues[item.key], 'value']}
           placeholder={item.placeholder}
-          allowClear
-          {...item.props}
+          allowClear={true}
           style={getItemStyle(item)}
+          {...item.props}
         >
           {item.props?.slots?.prefix && {
             prefix: () => <component is={item.props?.slots.prefix} />,
@@ -174,23 +175,25 @@ function renderFormItem(item: SearchConfigItem) {
     case 'search':
       return (
         <a-input
-          v-model:value={searchValues[item.key]}
+          v-model={[searchValues[item.key], 'value']}
           placeholder={item.placeholder}
-          allowClear
-          {...item.props}
+          allowClear={true}
           style={getItemStyle(item)}
+          {...item.props}
         >
-          {{ prefix: () => <FileOutlined class="text-[#bfbfbf]" /> }}
+          {{
+            prefix: () => <SearchOutlined class="text-[#bfbfbf]" />,
+          }}
         </a-input>
       )
     case 'select':
       return (
         <a-select
-          v-model:value={searchValues[item.key]}
+          v-model={[searchValues[item.key], 'value']}
           placeholder={item.placeholder}
-          allowClear
-          {...item.props}
+          allowClear={true}
           style={getItemStyle(item)}
+          {...item.props}
         >
           {item.options?.map(opt => (
             <a-select-option
@@ -205,10 +208,10 @@ function renderFormItem(item: SearchConfigItem) {
     case 'date':
       return (
         <a-date-picker
-          v-model:value={searchValues[item.key]}
+          v-model={[searchValues[item.key], 'value']}
           placeholder={item.placeholder}
-          {...item.props}
           style={{ width: '100%' }}
+          {...item.props}
         />
       )
     case 'custom':
@@ -233,32 +236,40 @@ function renderFormItem(item: SearchConfigItem) {
 <template>
   <div :class="styles['table-toolbar']">
     <!-- 基础搜索区域：显示常用搜索项 -->
-    <div :class="styles['toolbar-search-row']">
-      <a-form ref="formRef" :model="searchValues" layout="inline">
-        <!-- 动态渲染基础搜索表单项 -->
+    <div v-if="searchList.length" :class="styles['toolbar-search-row']">
+      <a-form
+        ref="formRef"
+        :model="searchValues"
+        layout="inline"
+        :class="styles['search-form']"
+      >
         <template v-for="item in commonSearchList" :key="item.key">
-          <a-form-item :name="item.key">
+          <a-form-item :name="item.key" :class="styles['search-form-item']">
             <component :is="renderFormItem(item)" />
           </a-form-item>
         </template>
 
-        <!-- 高级搜索展开/收起按钮 -->
-        <a-button
-          v-if="hasAdvanced"
-          type="link"
-          @click="showAdvanced = !showAdvanced"
-        >
-          {{ showAdvanced ? '收起' : '展开' }}
-          <DownOutlined v-if="!showAdvanced" />
-          <PlusOutlined v-else />
-        </a-button>
-      </a-form>
+        <a-form-item v-if="hasAdvanced" :class="styles['search-form-item']">
+          <a-button type="link" @click="showAdvanced = !showAdvanced">
+            {{ showAdvanced ? '收起' : '展开' }}
+            <DownOutlined v-if="!showAdvanced" />
+            <UpOutlined v-else />
+          </a-button>
+        </a-form-item>
 
-      <!-- 搜索和重置按钮 -->
-      <a-button type="primary" :icon="h(FileOutlined)" @click="handleSearch">
-        查询
-      </a-button>
-      <a-button @click="handleReset"> 重置 </a-button>
+        <a-form-item :class="styles['search-form-item']">
+          <a-button
+            type="primary"
+            :icon="h(SearchOutlined)"
+            @click="handleSearch"
+          >
+            查询
+          </a-button>
+        </a-form-item>
+        <a-form-item :class="styles['search-form-item']">
+          <a-button @click="handleReset"> 重置 </a-button>
+        </a-form-item>
+      </a-form>
     </div>
 
     <!-- 高级搜索区域：折叠显示的高级搜索项 -->
@@ -266,18 +277,22 @@ function renderFormItem(item: SearchConfigItem) {
       v-if="showAdvanced && hasAdvanced"
       :class="styles['toolbar-advanced-row']"
     >
-      <a-form ref="formRef" :model="searchValues" layout="inline">
-        <!-- 动态渲染高级搜索表单项 -->
-        <a-col v-for="item in advancedSearchList" :key="item.key" :span="8">
-          <a-form-item
-            :label="item.name"
-            :name="item.key"
-            :label-col="{ span: 3 }"
-            :class="styles['advanced-form-item']"
-          >
-            <component :is="renderFormItem(item)" />
-          </a-form-item>
-        </a-col>
+      <a-form
+        ref="formRef"
+        :model="searchValues"
+        :class="styles['advanced-form']"
+      >
+        <a-row :gutter="24" :class="styles['advanced-row']">
+          <a-col v-for="item in advancedSearchList" :key="item.key" :span="12">
+            <a-form-item
+              :label="item.name"
+              :name="item.key"
+              :class="styles['advanced-form-item']"
+            >
+              <component :is="renderFormItem(item)" />
+            </a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
     </div>
 

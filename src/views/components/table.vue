@@ -6,7 +6,7 @@
  * @LastEditTime: 2025-10-02 21:29:39
 -->
 <template>
-  <Container ref="containerRef" :padding="12" :full-height="true">
+  <Container :padding="12" :full-height="true">
     <CustomTable
       v-bind="{
         ...tableProps,
@@ -15,7 +15,6 @@
         searchList,
         operateList,
         bordered: true,
-        scroll: { y: scrollHeight },
       }"
       @search="handleSearch"
       @reset="handleReset"
@@ -28,32 +27,8 @@ import { ref, computed } from 'vue'
 import { Container } from '@/components/Container'
 import CustomTable from '@/components/CustomTable.vue'
 import { TableColumnTypeEnum } from '@/enums/table'
-import { useTable, useSize } from '@/hooks'
+import { useTable } from '@/hooks'
 import { fetchUserList } from '@/mock'
-
-// 容器引用
-const containerRef = ref<InstanceType<typeof Container> | null>(null)
-
-// 监听容器尺寸变化
-const containerSize = useSize(
-  computed(() => containerRef.value?.$el),
-  {
-    immediate: true,
-    listenWindowResize: false,
-  }
-)
-
-// 计算表格滚动高度（容器高度 - 信息区域高度 - 工具栏高度 - 分页高度 - 缓冲）
-const scrollHeight = computed(() => {
-  const baseHeight = containerSize.value.height
-  const toolbarHeight = 80 // 工具栏高度
-  const paginationHeight = 60 // 分页高度
-  const buffer = 80 // 缓冲空间
-
-  const calculatedHeight =
-    baseHeight - toolbarHeight - paginationHeight - buffer
-  return Math.max(calculatedHeight, 300) // 最小高度 300px
-})
 
 // 使用 useTable hook
 const { tableProps, search, selectedRowKeys, selectedRows } = useTable(
